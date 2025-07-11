@@ -1,0 +1,826 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
+import {
+  ArrowRight,
+  Lock,
+  Unlock,
+  Eye,
+  Brain,
+  Target,
+  Shield,
+  Crown,
+  Star,
+  Zap,
+  Gamepad2,
+  Activity,
+} from "lucide-react"
+
+interface Pergunta {
+  id: number
+  pergunta: string
+  opcoes: {
+    texto: string
+    pontos: number
+    feedback: string
+  }[]
+}
+
+const perguntas: Pergunta[] = [
+  {
+    id: 1,
+    pergunta: "Quando você vê alguém da sua idade faturando R$ 30.000/mês com marketing digital, qual é sua reação?",
+    opcoes: [
+      {
+        texto: "Deve ser sorte ou tem algo suspeito por trás",
+        pontos: 2,
+        feedback: "⚠️ Ceticismo excessivo pode bloquear oportunidades reais.",
+      },
+      {
+        texto: "Quero entender exatamente como essa pessoa conseguiu",
+        pontos: 9,
+        feedback: "🔥 Mentalidade de aprendizado ativada - você pensa como vencedor!",
+      },
+      {
+        texto: "Provavelmente é exagero para impressionar nas redes",
+        pontos: 1,
+        feedback: "💀 Negação da realidade pode estar limitando seu crescimento.",
+      },
+      {
+        texto: "Vou descobrir o método e replicar na minha realidade",
+        pontos: 10,
+        feedback: "⚡ NÍVEL MÁXIMO - Mentalidade de conquistador digital detectada!",
+      },
+    ],
+  },
+  {
+    id: 2,
+    pergunta: "Qual é o maior obstáculo que te impede de começar um negócio digital hoje?",
+    opcoes: [
+      {
+        texto: "Não sei por onde começar, há muita informação confusa",
+        pontos: 5,
+        feedback: "💡 Reconhecer a necessidade de direcionamento é inteligente.",
+      },
+      {
+        texto: "Tenho medo de falhar e desperdiçar tempo",
+        pontos: 4,
+        feedback: "⚠️ Medo do fracasso pode ser maior que o próprio fracasso.",
+      },
+      {
+        texto: "Não acredito que funcione para pessoas como eu",
+        pontos: 2,
+        feedback: "💀 Essa crença limitante pode estar sabotando seu potencial.",
+      },
+      {
+        texto: "Na verdade, não tenho obstáculos reais, só preciso do método certo",
+        pontos: 10,
+        feedback: "🚀 DESBLOQUEADO - Mente livre de limitações!",
+      },
+    ],
+  },
+  {
+    id: 3,
+    pergunta: "Como você se sente quando pensa em se expor nas redes sociais para promover algo?",
+    opcoes: [
+      {
+        texto: "Desconfortável - prefiro ficar nos bastidores",
+        pontos: 3,
+        feedback: "⚠️ Zona de conforto é onde os sonhos vão morrer.",
+      },
+      {
+        texto: "Ansioso, mas sei que é necessário para crescer",
+        pontos: 7,
+        feedback: "💪 Coragem é sentir medo e agir mesmo assim.",
+      },
+      {
+        texto: "Empolgado - vejo como chance de impactar pessoas",
+        pontos: 9,
+        feedback: "🌟 Visão de oportunidade onde outros veem problema!",
+      },
+      {
+        texto: "Natural - entendo que visibilidade é poder na era digital",
+        pontos: 10,
+        feedback: "👑 MESTRE DIGITAL - Você compreendeu o jogo!",
+      },
+    ],
+  },
+  {
+    id: 4,
+    pergunta: "Quando vê 'gurus' do marketing digital, sua primeira reação é:",
+    opcoes: [
+      {
+        texto: "Desconfiança total - maioria é enganação",
+        pontos: 2,
+        feedback: "💀 Ceticismo sem investigação pode custar oportunidades.",
+      },
+      {
+        texto: "Curiosidade misturada com cautela",
+        pontos: 6,
+        feedback: "🤔 Equilíbrio entre ceticismo e abertura é sábio.",
+      },
+      {
+        texto: "Analiso suas estratégias para extrair aprendizados",
+        pontos: 8,
+        feedback: "🧠 Mentalidade de estudante - você extrai valor de tudo!",
+      },
+      {
+        texto: "Vejo como referência do que é possível alcançar",
+        pontos: 10,
+        feedback: "✨ INSPIRAÇÃO ATIVADA - Você usa sucesso alheio como combustível!",
+      },
+    ],
+  },
+  {
+    id: 5,
+    pergunta: "Entre segurança e oportunidade de crescimento, você escolheria:",
+    opcoes: [
+      {
+        texto: "Sempre segurança - riscos me deixam nervoso",
+        pontos: 2,
+        feedback: "⚠️ Segurança excessiva pode ser o maior risco de todos.",
+      },
+      {
+        texto: "Oportunidade, mas com muito planejamento",
+        pontos: 6,
+        feedback: "⚖️ Planejamento é inteligente, mas não deixe virar paralisia.",
+      },
+      {
+        texto: "Oportunidade sempre - crescimento exige coragem",
+        pontos: 9,
+        feedback: "🔥 Coragem calculada é marca dos grandes realizadores!",
+      },
+      {
+        texto: "Criaria segurança através das oportunidades que abraço",
+        pontos: 10,
+        feedback: "💎 FILOSOFIA MESTRE - Você entendeu o paradoxo da segurança!",
+      },
+    ],
+  },
+  {
+    id: 6,
+    pergunta: "Sua relação com tecnologia e ferramentas digitais é:",
+    opcoes: [
+      {
+        texto: "Complicada - não sou uma pessoa muito técnica",
+        pontos: 3,
+        feedback: "⚠️ Tecnofobia pode ser superada com mentalidade certa.",
+      },
+      {
+        texto: "Básica - uso o essencial mas evito complicações",
+        pontos: 5,
+        feedback: "💡 Simplicidade é boa, mas evolução é necessária.",
+      },
+      {
+        texto: "Boa - aprendo rápido quando preciso de algo novo",
+        pontos: 8,
+        feedback: "🚀 Adaptabilidade é superpoder na era digital!",
+      },
+      {
+        texto: "Excelente - vejo tecnologia como extensão das minhas capacidades",
+        pontos: 10,
+        feedback: "⚡ CYBORG MODE - Você domina as ferramentas!",
+      },
+    ],
+  },
+  {
+    id: 7,
+    pergunta:
+      "Se hoje você recebesse acesso a um conteúdo avaliado em R$ 667, mas liberado apenas uma única vez por R$ 47, você:",
+    opcoes: [
+      {
+        texto: "Acharia estranho – parece bom demais",
+        pontos: 3,
+        feedback: "⚠️ Desconfiança excessiva pode fazer você perder oportunidades únicas.",
+      },
+      {
+        texto: "Pensaria demais e provavelmente perderia o prazo",
+        pontos: 5,
+        feedback: "💭 Paralisia de análise é inimiga da ação inteligente.",
+      },
+      {
+        texto: "Aproveitaria a chance – conteúdo de alto nível por esse valor não aparece duas vezes",
+        pontos: 8,
+        feedback: "🎯 Reconhecimento de valor e oportunidade detectado!",
+      },
+      {
+        texto: "Agiria na hora – sei o que algo assim pode gerar a longo prazo",
+        pontos: 10,
+        feedback: "💰 VISÃO ESTRATÉGICA - Você entende investimento em conhecimento!",
+      },
+    ],
+  },
+  {
+    id: 8,
+    pergunta: "Como você reage quando algo não sai como planejado?",
+    opcoes: [
+      {
+        texto: "Fico frustrado e demoro para tentar novamente",
+        pontos: 2,
+        feedback: "⚠️ Resiliência é músculo que precisa ser exercitado.",
+      },
+      {
+        texto: "Analiso o que deu errado e ajusto a estratégia",
+        pontos: 8,
+        feedback: "🎯 Mentalidade de melhoria contínua ativada!",
+      },
+      {
+        texto: "Vejo como aprendizado e parto para próxima tentativa",
+        pontos: 9,
+        feedback: "📈 Você transformou fracasso em combustível!",
+      },
+      {
+        texto: "Fico empolgado - cada erro me aproxima da solução",
+        pontos: 10,
+        feedback: "🔥 MENTALIDADE INVENCÍVEL - Você ama o processo!",
+      },
+    ],
+  },
+  {
+    id: 9,
+    pergunta: "Sua definição de sucesso no marketing digital seria:",
+    opcoes: [
+      {
+        texto: "Conseguir uma renda extra para complementar salário",
+        pontos: 4,
+        feedback: "💡 Bom começo, mas pense maior - seu potencial é ilimitado.",
+      },
+      {
+        texto: "Ter liberdade financeira para fazer escolhas",
+        pontos: 7,
+        feedback: "🗽 Liberdade é o verdadeiro luxo moderno!",
+      },
+      {
+        texto: "Construir negócio que impacte positivamente pessoas",
+        pontos: 9,
+        feedback: "🌟 Propósito + lucro = fórmula do sucesso sustentável!",
+      },
+      {
+        texto: "Dominar estratégias para criar múltiplas fontes de renda",
+        pontos: 10,
+        feedback: "👑 VISÃO DE IMPÉRIO - Você pensa como estrategista!",
+      },
+    ],
+  },
+  {
+    id: 10,
+    pergunta: "Se você não agir nos próximos 30 dias para mudar sua situação:",
+    opcoes: [
+      {
+        texto: "Provavelmente nada vai mudar, mas a vida continua",
+        pontos: 2,
+        feedback: "💀 Conformismo pode ser o maior inimigo do potencial.",
+      },
+      {
+        texto: "Continuarei igual, mas sempre há próxima oportunidade",
+        pontos: 4,
+        feedback: "⏰ Oportunidades têm prazo de validade - timing é tudo.",
+      },
+      {
+        texto: "Vou me arrepender de não ter aproveitado este momento",
+        pontos: 7,
+        feedback: "💭 Consciência da urgência é maturidade emocional.",
+      },
+      {
+        texto: "Ficarei frustrado comigo mesmo por deixar passar mais uma chance",
+        pontos: 10,
+        feedback: "🔥 URGÊNCIA MÁXIMA - Essa energia move montanhas!",
+      },
+    ],
+  },
+]
+
+export default function Component() {
+  const [telaAtual, setTelaAtual] = useState<"inicio" | "quiz" | "resultado">("inicio")
+  const [perguntaAtual, setPerguntaAtual] = useState(0)
+  const [pontuacao, setPontuacao] = useState(0)
+  const [pontuacaoAnterior, setPontuacaoAnterior] = useState(0)
+  const [mostrarFeedback, setMostrarFeedback] = useState(false)
+  const [opcaoSelecionada, setOpcaoSelecionada] = useState<any>(null)
+  const [pontosBonus, setPontosBonus] = useState(0)
+  const [mostrarExplosao, setMostrarExplosao] = useState(false)
+  const [nivel, setNivel] = useState(1)
+  const [animandoPontuacao, setAnimandoPontuacao] = useState(false)
+  const [progressoAnimado, setProgressoAnimado] = useState(0)
+
+  const progresso = ((perguntaAtual + 1) / perguntas.length) * 100
+
+  // Animar progresso suavemente
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setProgressoAnimado(progresso)
+    }, 100)
+    return () => clearTimeout(timer)
+  }, [progresso])
+
+  const iniciarMissao = () => {
+    setTelaAtual("quiz")
+  }
+
+  const responder = (opcao: any) => {
+    setOpcaoSelecionada(opcao)
+    setMostrarFeedback(true)
+
+    // Salvar pontuação anterior para animação
+    setPontuacaoAnterior(pontuacao)
+
+    // Animar pontuação
+    setAnimandoPontuacao(true)
+
+    setTimeout(() => {
+      const novaPontuacao = pontuacao + opcao.pontos
+      setPontuacao(novaPontuacao)
+
+      // Calcular nível baseado na pontuação
+      const novoNivel = Math.floor(novaPontuacao / 20) + 1
+      setNivel(novoNivel)
+
+      if (opcao.pontos >= 8) {
+        setPontosBonus(opcao.pontos)
+        setMostrarExplosao(true)
+        setTimeout(() => {
+          setPontosBonus(0)
+          setMostrarExplosao(false)
+        }, 3000)
+      }
+
+      setAnimandoPontuacao(false)
+    }, 300)
+  }
+
+  const proximaPergunta = () => {
+    if (perguntaAtual < perguntas.length - 1) {
+      setPerguntaAtual(perguntaAtual + 1)
+      setMostrarFeedback(false)
+      setOpcaoSelecionada(null)
+    } else {
+      setTelaAtual("resultado")
+    }
+  }
+
+  const tentarNovamente = () => {
+    setPerguntaAtual(0)
+    setPontuacao(0)
+    setPontuacaoAnterior(0)
+    setMostrarFeedback(false)
+    setOpcaoSelecionada(null)
+    setPontosBonus(0)
+    setMostrarExplosao(false)
+    setNivel(1)
+    setAnimandoPontuacao(false)
+    setProgressoAnimado(0)
+    setTelaAtual("quiz")
+  }
+
+  const garantirBonus = () => {
+    // Substitua pelo seu link real
+    window.open(
+      "https://wa.me/5511999999999?text=Completei%20a%20miss%C3%A3o%20digital%20e%20desbloqueei%20o%20conte%C3%BAdo%20secreto!%20Quero%20garantir%20por%20R%2447!",
+      "_blank",
+    )
+  }
+
+  // Tela de Início
+  if (telaAtual === "inicio") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-black via-slate-900 to-cyan-900 flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Efeitos de fundo futurísticos */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(6,182,212,0.1),transparent_50%)]"></div>
+        <div className="absolute top-10 left-10 w-20 h-20 border border-cyan-500/30 rounded-full animate-pulse"></div>
+        <div className="absolute bottom-10 right-10 w-16 h-16 border border-purple-500/30 rounded-full animate-ping"></div>
+        <div className="absolute top-1/2 left-10 w-12 h-12 border border-yellow-500/20 rounded-full animate-spin"></div>
+
+        <Card className="w-full max-w-2xl bg-black/90 backdrop-blur-xl border-2 border-cyan-500/50 shadow-2xl shadow-cyan-500/25 relative">
+          <div className="absolute -top-1 -left-1 -right-1 -bottom-1 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-lg opacity-75 blur-sm"></div>
+          <CardContent className="p-10 text-center relative bg-black/90 rounded-lg">
+            <div className="mb-8">
+              <div className="flex justify-center mb-6">
+                <div className="relative">
+                  <Gamepad2 className="w-24 h-24 text-cyan-400 animate-pulse" />
+                  <div className="absolute -top-3 -right-3">
+                    <Eye className="w-10 h-10 text-yellow-400 animate-bounce" />
+                  </div>
+                  <div className="absolute inset-0 animate-ping">
+                    <div className="w-2 h-2 bg-cyan-400 rounded-full absolute top-2 left-2"></div>
+                    <div className="w-1 h-1 bg-purple-400 rounded-full absolute bottom-3 right-4"></div>
+                  </div>
+                </div>
+              </div>
+
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-6 leading-tight">
+                ⚠️ Este teste não é para qualquer um.
+              </h1>
+              <p className="text-xl text-gray-300 leading-relaxed mb-8">
+                Você está prestes a iniciar uma missão para descobrir se realmente está pronto para ativar sua
+                consciência digital e mudar sua realidade financeira.
+              </p>
+            </div>
+
+            {/* HUD Info Enhanced */}
+            <div className="grid grid-cols-3 gap-4 mb-8">
+              <div className="bg-gradient-to-r from-cyan-600/20 to-blue-600/20 rounded-lg p-4 border border-cyan-500/30 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/5 to-blue-400/5 animate-pulse"></div>
+                <Target className="w-6 h-6 text-cyan-400 mx-auto mb-2" />
+                <div className="text-cyan-300 text-sm font-bold">MISSÃO</div>
+                <div className="text-white text-xs">Consciência Digital</div>
+              </div>
+              <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-lg p-4 border border-purple-500/30 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-400/5 to-pink-400/5 animate-pulse"></div>
+                <Shield className="w-6 h-6 text-purple-400 mx-auto mb-2" />
+                <div className="text-purple-300 text-sm font-bold">NÍVEL</div>
+                <div className="text-white text-xs">Elite</div>
+              </div>
+              <div className="bg-gradient-to-r from-yellow-600/20 to-orange-600/20 rounded-lg p-4 border border-yellow-500/30 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/5 to-orange-400/5 animate-pulse"></div>
+                <Activity className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
+                <div className="text-yellow-300 text-sm font-bold">STATUS</div>
+                <div className="text-white text-xs">28% Taxa Sucesso</div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-r from-red-600/20 to-orange-600/20 rounded-xl p-6 mb-8 border border-red-500/40 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-red-400/5 to-orange-400/5 animate-pulse"></div>
+              <div className="flex items-center justify-center mb-4">
+                <Brain className="w-8 h-8 text-orange-400 mr-3" />
+                <span className="text-orange-300 font-bold text-lg">PROTOCOLO DE INICIAÇÃO</span>
+              </div>
+              <p className="text-gray-300 text-lg leading-relaxed">
+                Esta experiência vai além de um teste comum. É um protocolo de ativação que revelará se sua mente está
+                preparada para acessar conhecimentos reservados para a elite digital.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-cyan-300 font-semibold text-lg">🎮 Pronto para iniciar sua jornada?</p>
+
+              <Button
+                onClick={iniciarMissao}
+                className="w-full bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-700 hover:to-purple-700 text-white font-bold py-6 px-8 rounded-xl text-xl transition-all duration-500 transform hover:scale-105 shadow-lg shadow-cyan-500/40 relative overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-purple-400/20 animate-pulse"></div>
+                <span className="relative">🚀 Começar a missão</span>
+                <ArrowRight className="ml-3 w-6 h-6 relative" />
+              </Button>
+
+              <p className="text-sm text-gray-500 mt-4">
+                ⏱️ Duração: 5 min • 🎯 10 Etapas • 🔥 Recompensa: Conteúdo Secreto
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Tela de Resultado
+  if (telaAtual === "resultado") {
+    const aprovado = pontuacao >= 70
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-black via-slate-900 to-purple-900 flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Efeitos de fundo */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(168,85,247,0.1),transparent_50%)]"></div>
+
+        <Card
+          className={`w-full max-w-2xl bg-black/90 backdrop-blur-xl border-2 shadow-2xl relative transition-all duration-1000 ${
+            aprovado ? "border-green-500/50 shadow-green-500/25" : "border-red-500/50 shadow-red-500/25"
+          }`}
+        >
+          <div
+            className={`absolute -top-1 -left-1 -right-1 -bottom-1 rounded-lg opacity-75 blur-sm transition-all duration-1000 ${
+              aprovado
+                ? "bg-gradient-to-r from-green-500 to-emerald-500"
+                : "bg-gradient-to-r from-red-500 to-orange-500"
+            }`}
+          ></div>
+          <CardContent className="p-10 text-center relative bg-black/90 rounded-lg">
+            {aprovado ? (
+              // Aprovado - Explosão de Recompensas
+              <>
+                <div className="mb-8 relative">
+                  <div className="flex justify-center mb-6 relative">
+                    <div className="relative">
+                      <Unlock className="w-32 h-32 text-green-400 animate-pulse" />
+                      <div className="absolute -top-4 -right-4">
+                        <Crown className="w-16 h-16 text-yellow-400 animate-bounce" />
+                      </div>
+                      {/* Explosão de partículas melhorada */}
+                      <div className="absolute inset-0">
+                        {[...Array(12)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-4 h-4 text-yellow-400 absolute animate-ping`}
+                            style={{
+                              top: `${Math.random() * 120 - 10}%`,
+                              left: `${Math.random() * 120 - 10}%`,
+                              animationDelay: `${i * 0.15}s`,
+                              animationDuration: "2s",
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent mb-6 leading-tight animate-pulse">
+                    🎉 🔓 MISSÃO COMPLETA! 🔓 🎉
+                  </h1>
+                  <p className="text-xl text-gray-300 mb-6 leading-relaxed">
+                    <span className="text-green-400 font-bold">Parabéns. Você desbloqueou o conteúdo secreto.</span>
+                  </p>
+                </div>
+
+                {/* HUD de Conquistas Enhanced */}
+                <div className="grid grid-cols-3 gap-4 mb-8">
+                  <div className="bg-gradient-to-r from-green-600/25 to-emerald-600/25 rounded-lg p-4 border border-green-500/40 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-emerald-400/10 animate-pulse"></div>
+                    <div className="text-4xl font-bold text-green-400 animate-bounce transition-all duration-1000">
+                      {pontuacao}
+                    </div>
+                    <div className="text-green-300 text-sm font-bold">PONTOS XP</div>
+                  </div>
+                  <div className="bg-gradient-to-r from-yellow-600/25 to-orange-600/25 rounded-lg p-4 border border-yellow-500/40 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 to-orange-400/10 animate-pulse"></div>
+                    <div className="text-4xl font-bold text-yellow-400 transition-all duration-1000">{nivel}</div>
+                    <div className="text-yellow-300 text-sm font-bold">NÍVEL</div>
+                  </div>
+                  <div className="bg-gradient-to-r from-purple-600/25 to-pink-600/25 rounded-lg p-4 border border-purple-500/40 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 to-pink-400/10 animate-pulse"></div>
+                    <Crown className="w-8 h-8 text-purple-400 mx-auto animate-bounce" />
+                    <div className="text-purple-300 text-sm font-bold">ELITE</div>
+                  </div>
+                </div>
+
+                {/* Recompensa Desbloqueada Enhanced */}
+                <div className="bg-gradient-to-r from-purple-600/25 to-pink-600/25 rounded-xl p-6 mb-8 border border-purple-500/40 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 to-pink-400/10 animate-pulse"></div>
+                  <div className="flex items-center justify-center mb-4 relative">
+                    <Zap className="w-8 h-8 text-purple-400 mr-2 animate-pulse" />
+                    <span className="text-purple-300 font-bold text-lg">RECOMPENSA DESBLOQUEADA</span>
+                  </div>
+                  <p className="text-white text-lg leading-relaxed mb-4 relative">
+                    ⚡ Esse Mapa Mental já foi avaliado em{" "}
+                    <span className="line-through text-red-400 text-xl">R$ 667</span>, mas{" "}
+                    <span className="text-yellow-400 font-bold">por mérito da sua performance</span>, está sendo
+                    liberado uma única vez por{" "}
+                    <span className="text-green-400 font-bold text-2xl animate-pulse">R$ 47</span>.
+                  </p>
+                  <p className="text-yellow-300 font-semibold relative">
+                    🔥 Acesso exclusivo para quem completou a missão com sucesso!
+                  </p>
+                </div>
+
+                {/* Badges de Conquista Animados Enhanced */}
+                <div className="flex justify-center space-x-4 mb-8">
+                  {[
+                    { icon: Crown, color: "yellow", label: "Elite" },
+                    { icon: Target, color: "green", label: "Precisão" },
+                    { icon: Brain, color: "purple", label: "Consciência" },
+                    { icon: Shield, color: "blue", label: "Proteção" },
+                  ].map((badge, i) => (
+                    <div
+                      key={i}
+                      className={`bg-${badge.color}-500/20 rounded-full p-3 border border-${badge.color}-400/50 animate-bounce transition-all duration-500 hover:scale-110`}
+                      style={{ animationDelay: `${i * 0.2}s` }}
+                    >
+                      <badge.icon className={`w-6 h-6 text-${badge.color}-400`} />
+                    </div>
+                  ))}
+                </div>
+
+                <div className="space-y-4">
+                  <p className="text-yellow-300 font-semibold text-lg">⚡ Sua janela de oportunidade está aberta</p>
+
+                  <Button
+                    onClick={garantirBonus}
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-6 px-8 rounded-xl text-xl transition-all duration-500 transform hover:scale-105 shadow-lg shadow-green-500/40 relative overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-400/20 animate-pulse"></div>
+                    <span className="relative">🎁 Quero garantir meu bônus agora</span>
+                    <ArrowRight className="ml-3 w-6 h-6 relative" />
+                  </Button>
+
+                  <p className="text-sm text-gray-400 mt-4">
+                    🔒 Acesso exclusivo • ⚡ Por mérito da performance • 🎯 Oportunidade única
+                  </p>
+                </div>
+              </>
+            ) : (
+              // Reprovado
+              <>
+                <div className="mb-8">
+                  <div className="flex justify-center mb-6">
+                    <Lock className="w-32 h-32 text-red-500 animate-pulse" />
+                  </div>
+                  <h1 className="text-4xl font-bold text-red-400 mb-6 leading-tight">
+                    🚫 Sua consciência digital ainda não está no nível necessário para acessar esse conteúdo.
+                  </h1>
+                  <p className="text-xl text-gray-300 mb-6 leading-relaxed">
+                    Sua performance revela alguns bloqueios que precisam ser trabalhados antes de acessar o próximo
+                    nível.
+                  </p>
+                </div>
+
+                {/* HUD de Status */}
+                <div className="grid grid-cols-3 gap-4 mb-8">
+                  <div className="bg-gradient-to-r from-red-600/25 to-orange-600/25 rounded-lg p-4 border border-red-500/40 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-red-400/10 to-orange-400/10 animate-pulse"></div>
+                    <div className="text-4xl font-bold text-red-400 transition-all duration-1000">{pontuacao}</div>
+                    <div className="text-red-300 text-sm font-bold">PONTOS XP</div>
+                  </div>
+                  <div className="bg-gradient-to-r from-yellow-600/25 to-orange-600/25 rounded-lg p-4 border border-yellow-500/40 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 to-orange-400/10 animate-pulse"></div>
+                    <div className="text-4xl font-bold text-yellow-400 transition-all duration-1000">{nivel}</div>
+                    <div className="text-yellow-300 text-sm font-bold">NÍVEL</div>
+                  </div>
+                  <div className="bg-gradient-to-r from-gray-600/25 to-gray-700/25 rounded-lg p-4 border border-gray-500/40 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-gray-400/10 to-gray-500/10 animate-pulse"></div>
+                    <Lock className="w-8 h-8 text-gray-400 mx-auto" />
+                    <div className="text-gray-300 text-sm font-bold">BLOQUEADO</div>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-r from-yellow-600/25 to-orange-600/25 rounded-xl p-6 mb-8 border border-yellow-500/40 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 to-orange-400/10 animate-pulse"></div>
+                  <div className="flex items-center justify-center mb-4">
+                    <Brain className="w-8 h-8 text-yellow-400 mr-2" />
+                    <span className="text-yellow-300 font-bold text-lg">OPORTUNIDADE DE EVOLUÇÃO</span>
+                  </div>
+                  <p className="text-white text-lg leading-relaxed">
+                    💡 Você precisa de pelo menos 70 XP para desbloquear o conteúdo secreto. Reflita sobre suas
+                    percepções e retorne quando estiver pronto para o próximo nível.
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <p className="text-orange-300 font-semibold text-lg">🔄 Evolução é um processo contínuo</p>
+
+                  <Button
+                    onClick={tentarNovamente}
+                    className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white font-bold py-6 px-8 rounded-xl text-xl transition-all duration-500 transform hover:scale-105 shadow-lg shadow-yellow-500/40"
+                  >
+                    🔄 Tente novamente
+                    <ArrowRight className="ml-3 w-6 h-6" />
+                  </Button>
+
+                  <p className="text-sm text-gray-400 mt-4">💭 Dica: Questione suas crenças limitantes</p>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Tela do Quiz
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-black via-slate-900 to-purple-900 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Efeitos de fundo futurísticos enhanced */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(168,85,247,0.1),transparent_50%)]"></div>
+      <div className="absolute top-20 left-20 w-32 h-32 border border-purple-500/20 rounded-full animate-spin"></div>
+      <div className="absolute bottom-20 right-20 w-24 h-24 border border-cyan-500/20 rounded-full animate-pulse"></div>
+      <div className="absolute top-1/3 right-10 w-16 h-16 border border-yellow-500/15 rounded-full animate-ping"></div>
+
+      <Card className="w-full max-w-2xl bg-black/90 backdrop-blur-xl border-2 border-purple-500/50 shadow-2xl shadow-purple-500/25 relative transition-all duration-500">
+        <div className="absolute -top-1 -left-1 -right-1 -bottom-1 bg-gradient-to-r from-purple-500 to-cyan-500 rounded-lg opacity-75 blur-sm"></div>
+        <CardContent className="p-8 relative bg-black/90 rounded-lg">
+          {/* HUD Header Enhanced */}
+          <div className="text-center mb-6">
+            <div className="flex items-center justify-center mb-4">
+              <Eye className="w-8 h-8 text-purple-400 mr-2 animate-pulse" />
+              <span className="text-purple-300 font-bold text-lg">MISSÃO EM ANDAMENTO</span>
+            </div>
+            <h1 className="text-2xl font-bold text-white mb-2">Protocolo de Ativação Digital</h1>
+          </div>
+
+          {/* HUD Stats Enhanced */}
+          <div className="grid grid-cols-4 gap-3 mb-6">
+            <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-lg p-3 border border-purple-500/30 text-center relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-400/5 to-pink-400/5 animate-pulse"></div>
+              <div
+                className={`text-2xl font-bold text-purple-400 transition-all duration-700 ${animandoPontuacao ? "scale-125 text-green-400" : ""}`}
+              >
+                {animandoPontuacao ? pontuacaoAnterior : pontuacao}
+              </div>
+              <div className="text-purple-300 text-xs font-bold">XP</div>
+            </div>
+            <div className="bg-gradient-to-r from-cyan-600/20 to-blue-600/20 rounded-lg p-3 border border-cyan-500/30 text-center relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/5 to-blue-400/5 animate-pulse"></div>
+              <div className="text-2xl font-bold text-cyan-400 transition-all duration-700">{nivel}</div>
+              <div className="text-cyan-300 text-xs font-bold">NÍVEL</div>
+            </div>
+            <div className="bg-gradient-to-r from-yellow-600/20 to-orange-600/20 rounded-lg p-3 border border-yellow-500/30 text-center relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/5 to-orange-400/5 animate-pulse"></div>
+              <div className="text-2xl font-bold text-yellow-400">{perguntaAtual + 1}</div>
+              <div className="text-yellow-300 text-xs font-bold">ETAPA</div>
+            </div>
+            <div className="bg-gradient-to-r from-green-600/20 to-emerald-600/20 rounded-lg p-3 border border-green-500/30 text-center relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-green-400/5 to-emerald-400/5 animate-pulse"></div>
+              <div className="text-2xl font-bold text-green-400">{Math.round(progressoAnimado)}%</div>
+              <div className="text-green-300 text-xs font-bold">PROG</div>
+            </div>
+          </div>
+
+          {/* Barra de Progresso Futurística Enhanced */}
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-purple-300 font-semibold">
+                Progresso da Missão: {Math.round(progressoAnimado)}%
+              </span>
+              <span className="text-white font-bold">
+                {perguntaAtual + 1}/{perguntas.length}
+              </span>
+            </div>
+            <div className="relative">
+              <Progress
+                value={progressoAnimado}
+                className="h-4 bg-gray-800 border border-purple-500/40 transition-all duration-700 ease-out"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-full animate-pulse"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Efeito de Pontos Flutuantes Enhanced */}
+          {mostrarExplosao && (
+            <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center">
+              <div className="text-6xl font-bold text-green-400 animate-bounce">+{pontosBonus}</div>
+              <div className="text-2xl font-bold text-green-300 mt-2 animate-pulse">Pontos de Consciência!</div>
+              <div className="absolute">
+                {[...Array(16)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="w-3 h-3 bg-gradient-to-r from-yellow-400 to-green-400 rounded-full absolute animate-ping"
+                    style={{
+                      top: `${Math.random() * 300 - 150}px`,
+                      left: `${Math.random() * 300 - 150}px`,
+                      animationDelay: `${i * 0.1}s`,
+                      animationDuration: "2s",
+                    }}
+                  ></div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Pergunta Enhanced */}
+          <div className="mb-8">
+            <div className="bg-gradient-to-r from-purple-600/25 to-pink-600/25 rounded-xl p-6 mb-6 border border-purple-500/40 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 to-pink-400/10 animate-pulse"></div>
+              <h2 className="text-xl font-bold text-white leading-relaxed relative">
+                {perguntas[perguntaAtual].pergunta}
+              </h2>
+            </div>
+
+            <div className="space-y-4">
+              {perguntas[perguntaAtual].opcoes.map((opcao, index) => (
+                <button
+                  key={index}
+                  onClick={() => !mostrarFeedback && responder(opcao)}
+                  disabled={mostrarFeedback}
+                  className={`w-full p-5 text-left rounded-xl border-2 transition-all duration-500 transform hover:scale-[1.02] relative overflow-hidden ${
+                    opcaoSelecionada === opcao
+                      ? "bg-gradient-to-r from-purple-600/40 to-pink-600/40 border-purple-400 text-white shadow-lg shadow-purple-500/30"
+                      : "bg-gradient-to-r from-gray-800/60 to-gray-700/60 border-gray-600 text-gray-100 hover:bg-gradient-to-r hover:from-gray-700/60 hover:to-gray-600/60 hover:border-purple-500/60"
+                  } ${mostrarFeedback ? "cursor-not-allowed" : "cursor-pointer hover:shadow-lg"}`}
+                >
+                  {!mostrarFeedback && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-400/5 to-pink-400/5 animate-pulse"></div>
+                  )}
+                  <div className="flex items-center relative">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm mr-4 border border-purple-400/50 transition-all duration-300">
+                      {String.fromCharCode(65 + index)}
+                    </div>
+                    <span className="font-medium">{opcao.texto}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Feedback Enhanced */}
+          {mostrarFeedback && opcaoSelecionada && (
+            <div className="mb-6 p-6 bg-gradient-to-r from-purple-600/25 to-pink-600/25 rounded-xl border-2 border-purple-500/50 shadow-lg shadow-purple-500/30 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 to-pink-400/10 animate-pulse"></div>
+              <p className="text-white font-bold text-lg mb-6 leading-relaxed relative">{opcaoSelecionada.feedback}</p>
+              <Button
+                onClick={proximaPergunta}
+                className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold py-4 px-6 rounded-xl text-lg transition-all duration-500 transform hover:scale-105 shadow-lg shadow-purple-500/40 relative overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 animate-pulse"></div>
+                <span className="relative">
+                  {perguntaAtual < perguntas.length - 1 ? "⚡ Próxima etapa" : "🔍 Finalizar missão"}
+                </span>
+                <ArrowRight className="ml-2 w-5 h-5 relative" />
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
